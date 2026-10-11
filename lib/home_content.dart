@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'model/kue.dart';
+import 'data/kue_data.dart';
 import 'cake_card.dart';
 import 'checkout_page.dart';
 import 'rating_widget.dart';
@@ -14,249 +16,12 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   final TextEditingController searchController = TextEditingController();
 
-  // =========================================================
-  // DATA KUE
-  // =========================================================
-
-  final List<Kue> cakeData = [
-    // =======================================================
-    // KUE TRADISIONAL
-    // =======================================================
-
-    Kue(
-      image: 'assets/images/tradisi_cake1.jpg',
-      name: 'Clorot',
-      description:
-          'Kue dari tepung beras, santan, dan gula merah yang dibungkus janur, bertekstur lembut dan manis.',
-      price: 6000,
-      stock: 15,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake2.jpg',
-      name: 'Nagasari',
-      description:
-          'Kue tepung beras berisi pisang yang dibungkus daun pisang dan dikukus.',
-      price: 3000,
-      stock: 15,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake3.jpg',
-      name: 'Kue Bugis',
-      description:
-          'Kue ketan berisi kelapa manis, bertekstur kenyal dan bercita rasa manis.',
-      price: 4000,
-      stock: 12,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake4.jpg',
-      name: 'Kue Talam',
-      description:
-          'Kue berlapis berbahan tepung dan santan dengan rasa manis gurih.',
-      price: 4000,
-      stock: 10,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake5.jpg',
-      name: 'Lemper',
-      description:
-          'Ketan berisi ayam atau abon yang dibungkus daun pisang, bercita rasa gurih.',
-      price: 4000,
-      stock: 10,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake6.jpg',
-      name: 'Dadar Gulung Pandan',
-      description:
-          'Kue tradisional berbahan kulit pandan yang lembut dan beraroma khas, berisi kelapa parut manis yang dimasak dengan gula merah.',
-      price: 4000,
-      stock: 10,
-      category: 'Kue Tradisional',
-    ),
-
-    Kue(
-      image: 'assets/images/tradisi_cake7.jpg',
-      name: 'Putu Ayu Gulung',
-      description:
-          'Kue tradisional berbahan pandan yang lembut dengan isian gula merah manis dan balutan kelapa parut gurih.',
-      price: 4000,
-      stock: 10,
-      category: 'Kue Tradisional',
-    ),
-
-    // =======================================================
-    // KUE ULANG TAHUN
-    // =======================================================
-
-    Kue(
-      image: 'assets/images/ultah_cake1.jpg',
-      name: 'Pretzel Cream Cake',
-      description:
-          'Kue ulang tahun dengan dekorasi krim lembut dan topping pretzel yang unik, menghadirkan perpaduan tampilan minimalis serta cita rasa manis yang istimewa.',
-      price: 90000,
-      stock: 5,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake2.jpg',
-      name: 'Choco Drip Cake',
-      description:
-          'Kue cokelat premium dengan lapisan ganache drip yang lembut, dihias cokelat dan krim manis untuk menciptakan tampilan elegan dan cita rasa yang kaya.',
-      price: 120000,
-      stock: 5,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake3.jpg',
-      name: 'Pink Blossom Cake',
-      description:
-          'Kue ulang tahun dengan dekorasi pink yang cantik dan estetik, cocok untuk berbagai perayaan spesial.',
-      price: 90000,
-      stock: 5,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake4.jpg',
-      name: 'Korean Bento Cake',
-      description:
-          'Kue mini estetik bergaya Korea dengan dekorasi simpel dan warna pastel yang cantik, cocok untuk berbagai acara spesial.',
-      price: 55000,
-      stock: 10,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake5.jpg',
-      name: 'Lotso Cake',
-      description:
-          'Kue bertema beruang Lotso dengan dekorasi warna pink yang lucu dan menarik, cocok untuk ulang tahun atau acara spesial.',
-      price: 150000,
-      stock: 4,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake6.jpg',
-      name: 'Rainbow Fruit Cake',
-      description: 
-         'Kue ulang tahun berwarna-warni dengan lapisan krim pelangi dan topping buah segar seperti stroberi, kiwi, anggur, jeruk, dan nanas.',
-      price: 150000,
-      stock: 5,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    Kue(
-      image: 'assets/images/ultah_cake7.jpg',
-      name: 'Pastel Dream Cake',
-      description: 
-         'Kue ulang tahun dengan kombinasi warna pastel biru dan pink yang lembut, dihiasi tulisan ucapan sederhana untuk menciptakan tampilan manis, elegan, dan estetik.',
-      price: 80000,
-      stock: 5,
-      category: 'Kue Ulang Tahun',
-    ),
-
-    // =======================================================
-    // PASTRY
-    // =======================================================
-
-    Kue(
-      image: 'assets/images/pastry_cake1.jpg',
-      name: 'Berry Puff Pastry',
-      description:
-          'Pastry renyah berlapis dengan isian krim lembut dan topping buah beri segar, menghadirkan perpaduan rasa manis, segar, dan lezat dalam setiap gigitan.',
-      price: 30000,
-      stock: 12,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake2.jpg',
-      name: 'Choco Roll Pastry',
-      description:
-          'Pastry gulung renyah dengan isian cokelat yang lumer dan taburan gula halus, menghadirkan rasa manis yang lezat di setiap gigitan.',
-      price: 15000,
-      stock: 10,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake3.jpg',
-      name: 'Cherry Danish Pastry',
-      description:
-          'Pastry berlapis yang renyah dengan topping ceri manis dan lapisan glasir lembut, menghadirkan perpaduan rasa manis dan segar yang menggugah selera.',
-      price: 25000,
-      stock: 10,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake4.jpg',
-      name: 'Blueberry Cream Puff',
-      description:
-          'Pastry renyah berlapis dengan isian blueberry manis dan topping meringue lembut, menciptakan perpaduan rasa manis, segar, dan elegan.',
-      price: 18000,
-      stock: 8,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake5.jpg',
-      name: 'Berry Bliss Pastry',
-      description:
-          'Pastry berlapis yang renyah dengan isian stroberi manis dan segar, dipadukan dengan taburan gula halus yang menambah cita rasa lezat dan tampilan menggoda.',
-      price: 20000,
-      stock: 8,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake6.webp',
-      name: 'Strawberry Croissant',
-      description:
-          'Pastry croissant renyah dengan sentuhan stroberi segar yang manis dan menyegarkan.',
-      price: 25000,
-      stock: 8,
-      category: 'Pastry',
-    ),
-
-    Kue(
-      image: 'assets/images/pastry_cake7.jpg',
-      name: 'Shortcrust Pastry',
-      description:
-          'Pastry dengan tekstur renyah dan rapuh yang dibuat dari campuran tepung, mentega, dan gula. Cocok digunakan sebagai dasar berbagai pie dan tart.',
-      price: 50000,
-      stock: 8,
-      category: 'Pastry',
-    ),
-
-  ];
-
-  // =========================================================
-  // KERANJANG, RATING, DAN FAVORIT
-  // =========================================================
-
+  // DATA KERANJANG, RATING, DAN FAVORIT
   final Map<Kue, int> cart = {};
-
   final Map<Kue, double> ratings = {};
-
   final List<Kue> savedProducts = [];
 
-  // =========================================================
   // SEARCH
-  // =========================================================
-
   String searchText = '';
 
   @override
@@ -270,29 +35,20 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // =========================================================
-  // FILTER PRODUK BERDASARKAN SEARCH + KATEGORI
-  // =========================================================
-
+  // FILTER PRODUK BERDASARKAN SEARCH DAN KATEGORI
   List<Kue> getProductsByCategory(String category) {
-    return cakeData.where((cake) {
+    return kueData.where((cake) {
       return cake.category == category &&
           cake.name.toLowerCase().contains(searchText);
     }).toList();
   }
 
-  // =========================================================
   // RATING
-  // =========================================================
-
   double getRating(Kue cake) {
     return ratings[cake] ?? 4.5;
   }
 
-  // =========================================================
   // FAVORIT
-  // =========================================================
-
   void toggleSaved(Kue cake) {
     setState(() {
       if (savedProducts.contains(cake)) {
@@ -303,10 +59,7 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // =========================================================
   // TAMBAH KE KERANJANG
-  // =========================================================
-
   void addToCart(Kue cake) {
     setState(() {
       int currentQuantity = cart[cake] ?? 0;
@@ -316,9 +69,7 @@ class _HomeContentState extends State<HomeContent> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              '${cake.name} ditambahkan ke keranjang',
-            ),
+            content: Text('${cake.name} ditambahkan ke keranjang'),
             backgroundColor: const Color(0xFF8B5E3C),
             duration: const Duration(seconds: 1),
           ),
@@ -326,9 +77,7 @@ class _HomeContentState extends State<HomeContent> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Jumlah melebihi stok yang tersedia',
-            ),
+            content: Text('Jumlah melebihi stok yang tersedia'),
             backgroundColor: Color(0xFF5D321D),
           ),
         );
@@ -336,10 +85,7 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // =========================================================
   // KURANGI JUMLAH KERANJANG
-  // =========================================================
-
   void decreaseQuantity(Kue cake) {
     setState(() {
       if (cart.containsKey(cake)) {
@@ -352,10 +98,7 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // =========================================================
   // JUMLAH ITEM DI KERANJANG
-  // =========================================================
-
   int getCartItemCount() {
     int total = 0;
 
@@ -366,10 +109,7 @@ class _HomeContentState extends State<HomeContent> {
     return total;
   }
 
-  // =========================================================
   // TOTAL HARGA KERANJANG
-  // =========================================================
-
   int getCartTotal() {
     int total = 0;
 
@@ -380,10 +120,7 @@ class _HomeContentState extends State<HomeContent> {
     return total;
   }
 
-  // =========================================================
   // FORMAT RUPIAH
-  // =========================================================
-
   String formatRupiah(int value) {
     String priceString = value.toString();
     String result = '';
@@ -399,10 +136,7 @@ class _HomeContentState extends State<HomeContent> {
     return 'Rp$result';
   }
 
-  // =========================================================
   // CHECKOUT BERHASIL
-  // =========================================================
-
   void processSuccessfulCheckout() {
     setState(() {
       cart.forEach((cake, quantity) {
@@ -413,10 +147,7 @@ class _HomeContentState extends State<HomeContent> {
     });
   }
 
-  // =========================================================
   // DETAIL PRODUK
-  // =========================================================
-
   void showCakeDetail(Kue cake) {
     double currentRating = getRating(cake);
 
@@ -447,9 +178,7 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 15),
-
                 Text(
                   cake.name,
                   style: const TextStyle(
@@ -458,9 +187,7 @@ class _HomeContentState extends State<HomeContent> {
                     color: Color(0xFF5D321D),
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   cake.description,
                   style: const TextStyle(
@@ -468,9 +195,7 @@ class _HomeContentState extends State<HomeContent> {
                     color: Colors.grey,
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
                 Text(
                   cake.getFormattedPrice(),
                   style: const TextStyle(
@@ -479,18 +204,12 @@ class _HomeContentState extends State<HomeContent> {
                     color: Color(0xFF8B5E3C),
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Text(
                   cake.getStockInfo(),
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(color: Colors.grey),
                 ),
-
                 const SizedBox(height: 15),
-
                 const Text(
                   'Rating',
                   style: TextStyle(
@@ -498,9 +217,7 @@ class _HomeContentState extends State<HomeContent> {
                     color: Color(0xFF5D321D),
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 RatingWidget(
                   initialRating: currentRating,
                   onRatingChanged: (value) {
@@ -509,9 +226,7 @@ class _HomeContentState extends State<HomeContent> {
                     });
                   },
                 ),
-
                 const SizedBox(height: 15),
-
                 Row(
                   children: [
                     Expanded(
@@ -520,15 +235,12 @@ class _HomeContentState extends State<HomeContent> {
                           Navigator.pop(context);
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor:
-                              const Color(0xFF8B5E3C),
+                          foregroundColor: const Color(0xFF8B5E3C),
                         ),
                         child: const Text('Tutup'),
                       ),
                     ),
-
                     const SizedBox(width: 10),
-
                     Expanded(
                       child: ElevatedButton(
                         onPressed: cake.isAvailable()
@@ -538,8 +250,7 @@ class _HomeContentState extends State<HomeContent> {
                               }
                             : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color(0xFF8B5E3C),
+                          backgroundColor: const Color(0xFF8B5E3C),
                           foregroundColor: Colors.white,
                         ),
                         child: const Text('Tambah'),
@@ -555,14 +266,8 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // =========================================================
   // SECTION KATEGORI
-  // =========================================================
-
-  Widget buildCategorySection(
-    String title,
-    List<Kue> products,
-  ) {
+  Widget buildCategorySection(String title, List<Kue> products) {
     if (products.isEmpty) {
       return const SizedBox();
     }
@@ -581,10 +286,7 @@ class _HomeContentState extends State<HomeContent> {
             ),
           ),
         ),
-
         const SizedBox(height: 12),
-
-        // BAGIAN PRODUK BISA DIGESER KE SAMPING
         SizedBox(
           height: 365,
           child: ListView.builder(
@@ -611,34 +313,18 @@ class _HomeContentState extends State<HomeContent> {
             },
           ),
         ),
-
         const SizedBox(height: 20),
       ],
     );
   }
 
-  // =========================================================
   // KATEGORI DEKORASI
-  // =========================================================
-
   Widget buildCategories() {
     final categories = [
-      {
-        'icon': Icons.grid_view_rounded,
-        'name': 'Semua',
-      },
-      {
-        'icon': Icons.cake,
-        'name': 'Kue Tradisional',
-      },
-      {
-        'icon': Icons.celebration,
-        'name': 'Kue Ulang Tahun',
-      },
-      {
-        'icon': Icons.bakery_dining,
-        'name': 'Pastry',
-      },
+      {'icon': Icons.grid_view_rounded, 'name': 'Semua'},
+      {'icon': Icons.cake, 'name': 'Kue Tradisional'},
+      {'icon': Icons.celebration, 'name': 'Kue Ulang Tahun'},
+      {'icon': Icons.bakery_dining, 'name': 'Pastry'},
     ];
 
     return SizedBox(
@@ -666,9 +352,7 @@ class _HomeContentState extends State<HomeContent> {
                     size: 28,
                   ),
                 ),
-
                 const SizedBox(height: 7),
-
                 Text(
                   categories[index]['name'] as String,
                   textAlign: TextAlign.center,
@@ -688,19 +372,14 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // =========================================================
   // KERANJANG
-  // =========================================================
-
   void showCart() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(25),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
         return StatefulBuilder(
@@ -710,7 +389,6 @@ class _HomeContentState extends State<HomeContent> {
               child: Column(
                 children: [
                   const SizedBox(height: 15),
-
                   Container(
                     width: 45,
                     height: 5,
@@ -719,9 +397,7 @@ class _HomeContentState extends State<HomeContent> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-
                   const SizedBox(height: 15),
-
                   const Text(
                     'Keranjang Saya',
                     style: TextStyle(
@@ -730,25 +406,19 @@ class _HomeContentState extends State<HomeContent> {
                       color: Color(0xFF5D321D),
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   Expanded(
                     child: cart.isEmpty
                         ? const Center(
                             child: Text(
                               'Keranjang masih kosong',
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
+                              style: TextStyle(color: Colors.grey),
                             ),
                           )
                         : ListView.builder(
                             itemCount: cart.length,
                             itemBuilder: (context, index) {
-                              final cake =
-                                  cart.keys.elementAt(index);
-
+                              final cake = cart.keys.elementAt(index);
                               final quantity = cart[cake]!;
 
                               return ListTile(
@@ -760,7 +430,6 @@ class _HomeContentState extends State<HomeContent> {
                                     fit: BoxFit.contain,
                                   ),
                                 ),
-
                                 title: Text(
                                   cake.name,
                                   style: const TextStyle(
@@ -768,11 +437,9 @@ class _HomeContentState extends State<HomeContent> {
                                     color: Color(0xFF5D321D),
                                   ),
                                 ),
-
                                 subtitle: Text(
                                   '${cake.getFormattedPrice()} x $quantity',
                                 ),
-
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -786,14 +453,12 @@ class _HomeContentState extends State<HomeContent> {
                                         color: Color(0xFF8B5E3C),
                                       ),
                                     ),
-
                                     Text(
                                       '$quantity',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
                                     IconButton(
                                       onPressed: () {
                                         addToCart(cake);
@@ -810,8 +475,6 @@ class _HomeContentState extends State<HomeContent> {
                             },
                           ),
                   ),
-
-                  // TOTAL
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -826,8 +489,7 @@ class _HomeContentState extends State<HomeContent> {
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
                               'Total',
@@ -837,7 +499,6 @@ class _HomeContentState extends State<HomeContent> {
                                 color: Color(0xFF5D321D),
                               ),
                             ),
-
                             Text(
                               formatRupiah(getCartTotal()),
                               style: const TextStyle(
@@ -848,9 +509,7 @@ class _HomeContentState extends State<HomeContent> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 15),
-
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -862,10 +521,8 @@ class _HomeContentState extends State<HomeContent> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            CheckoutPage(
-                                          cart:
-                                              Map<Kue, int>.from(cart),
+                                        builder: (context) => CheckoutPage(
+                                          cart: Map<Kue, int>.from(cart),
                                           onOrderSuccess:
                                               processSuccessfulCheckout,
                                         ),
@@ -873,16 +530,13 @@ class _HomeContentState extends State<HomeContent> {
                                     );
                                   },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color(0xFF8B5E3C),
+                              backgroundColor: const Color(0xFF8B5E3C),
                               foregroundColor: Colors.white,
-                              padding:
-                                  const EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 vertical: 14,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(15),
                               ),
                             ),
                             child: const Text(
@@ -906,18 +560,13 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // =========================================================
   // PRODUK TERSIMPAN
-  // =========================================================
-
   void showSavedProducts() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(25),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       builder: (context) {
         return SizedBox(
@@ -925,7 +574,6 @@ class _HomeContentState extends State<HomeContent> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
               const Text(
                 'Kue Tersimpan',
                 style: TextStyle(
@@ -934,17 +582,13 @@ class _HomeContentState extends State<HomeContent> {
                   color: Color(0xFF5D321D),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               Expanded(
                 child: savedProducts.isEmpty
                     ? const Center(
                         child: Text(
                           'Belum ada kue yang disimpan',
-                          style: TextStyle(
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(color: Colors.grey),
                         ),
                       )
                     : ListView.builder(
@@ -961,7 +605,6 @@ class _HomeContentState extends State<HomeContent> {
                                 fit: BoxFit.contain,
                               ),
                             ),
-
                             title: Text(
                               cake.name,
                               style: const TextStyle(
@@ -969,11 +612,7 @@ class _HomeContentState extends State<HomeContent> {
                                 color: Color(0xFF5D321D),
                               ),
                             ),
-
-                            subtitle: Text(
-                              cake.getFormattedPrice(),
-                            ),
-
+                            subtitle: Text(cake.getFormattedPrice()),
                             trailing: IconButton(
                               onPressed: () {
                                 toggleSaved(cake);
@@ -995,27 +634,16 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // =========================================================
   // BUILD
-  // =========================================================
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // ===================================================
           // HEADER
-          // ===================================================
-
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(
-              18,
-              20,
-              18,
-              18,
-            ),
+            padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
             decoration: const BoxDecoration(
               color: Color(0xFF8B5E3C),
               borderRadius: BorderRadius.only(
@@ -1030,8 +658,7 @@ class _HomeContentState extends State<HomeContent> {
                   children: [
                     const Expanded(
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Zia Bakery 🍰',
@@ -1041,9 +668,7 @@ class _HomeContentState extends State<HomeContent> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-
                           SizedBox(height: 3),
-
                           Text(
                             'Temukan kue favoritmu',
                             style: TextStyle(
@@ -1054,8 +679,6 @@ class _HomeContentState extends State<HomeContent> {
                         ],
                       ),
                     ),
-
-                    // FAVORIT
                     IconButton(
                       onPressed: showSavedProducts,
                       icon: const Icon(
@@ -1063,8 +686,6 @@ class _HomeContentState extends State<HomeContent> {
                         color: Colors.white,
                       ),
                     ),
-
-                    // KERANJANG
                     Stack(
                       children: [
                         IconButton(
@@ -1074,16 +695,13 @@ class _HomeContentState extends State<HomeContent> {
                             color: Colors.white,
                           ),
                         ),
-
                         if (getCartItemCount() > 0)
                           Positioned(
                             right: 5,
                             top: 3,
                             child: Container(
-                              padding:
-                                  const EdgeInsets.all(5),
-                              decoration:
-                                  const BoxDecoration(
+                              padding: const EdgeInsets.all(5),
+                              decoration: const BoxDecoration(
                                 color: Color(0xFF5D321D),
                                 shape: BoxShape.circle,
                               ),
@@ -1101,31 +719,22 @@ class _HomeContentState extends State<HomeContent> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 18),
-
-                // SEARCH
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                   child: TextField(
                     controller: searchController,
-                    decoration:
-                        const InputDecoration(
-                      hintText:
-                          'Cari kue yang kamu suka...',
+                    decoration: const InputDecoration(
+                      hintText: 'Cari kue yang kamu suka...',
                       prefixIcon: Icon(
                         Icons.search,
                         color: Color(0xFF8B5E3C),
                       ),
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(
-                        vertical: 15,
-                      ),
+                      contentPadding: EdgeInsets.symmetric(vertical: 15),
                     ),
                   ),
                 ),
@@ -1135,45 +744,23 @@ class _HomeContentState extends State<HomeContent> {
 
           const SizedBox(height: 18),
 
-          // ===================================================
           // KATEGORI
-          // ===================================================
-
           buildCategories(),
 
           const SizedBox(height: 10),
 
-          // ===================================================
-          // KUE TRADISIONAL
-          // ===================================================
-
+          // DAFTAR PRODUK
           buildCategorySection(
             'Kue Tradisional',
-            getProductsByCategory(
-              'Kue Tradisional',
-            ),
+            getProductsByCategory('Kue Tradisional'),
           ),
-
-          // ===================================================
-          // KUE ULANG TAHUN
-          // ===================================================
-
           buildCategorySection(
             'Kue Ulang Tahun',
-            getProductsByCategory(
-              'Kue Ulang Tahun',
-            ),
+            getProductsByCategory('Kue Ulang Tahun'),
           ),
-
-          // ===================================================
-          // PASTRY
-          // ===================================================
-
           buildCategorySection(
             'Pastry',
-            getProductsByCategory(
-              'Pastry',
-            ),
+            getProductsByCategory('Pastry'),
           ),
 
           const SizedBox(height: 30),
@@ -1182,10 +769,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // =========================================================
   // DISPOSE
-  // =========================================================
-
   @override
   void dispose() {
     searchController.dispose();

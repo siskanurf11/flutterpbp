@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_content.dart';
 import 'profile_page.dart';
+import 'riwayat_pesanan_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,7 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
 
-  // Warna cokelat
+  // Warna cokelat Zia Bakery
   final Color darkBrown = const Color(0xFF5D321D);
   final Color brown = const Color(0xFF8B5E3C);
   final Color lightBrown = const Color(0xFFE8D5C4);
@@ -20,14 +21,25 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<String> titles = [
+      'Home',
+      'Riwayat Pesanan',
+      'Profile',
+    ];
+
+    final List<Widget> pages = [
+      const HomeContent(),
+      const RiwayatPesananPage(),
+      const ProfilePage(),
+    ];
+
     return Scaffold(
       backgroundColor: backgroundBrown,
 
-      // ================= APP BAR =================
-
+      // APP BAR
       appBar: AppBar(
         title: Text(
-          selectedIndex == 0 ? 'Home' : 'Profile',
+          titles[selectedIndex],
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
@@ -38,21 +50,16 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
       ),
 
-      // ================= ISI =================
+      // ISI HALAMAN
+      body: IndexedStack(
+        index: selectedIndex,
+        children: pages,
+      ),
 
-      body: selectedIndex == 0
-          ? const HomeContent()
-          : const ProfilePage(),
-
-      // ================= NAVBAR =================
-
+      // NAVIGASI BAWAH
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
-
-  // =========================================================
-  // NAVBAR
-  // =========================================================
 
   Widget _buildBottomNavigationBar() {
     return Container(
@@ -81,18 +88,20 @@ class _HomePageState extends State<HomePage> {
           ),
 
           _buildNavItem(
+            icon: Icons.receipt_long,
+            label: 'Riwayat',
+            index: 1,
+          ),
+
+          _buildNavItem(
             icon: Icons.person,
             label: 'Profile',
-            index: 1,
+            index: 2,
           ),
         ],
       ),
     );
   }
-
-  // =========================================================
-  // ITEM NAVBAR
-  // =========================================================
 
   Widget _buildNavItem({
     required IconData icon,
@@ -112,35 +121,26 @@ class _HomePageState extends State<HomePage> {
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: isSelected ? 58 : 45,
-            height: isSelected ? 58 : 45,
+            width: isSelected ? 50 : 42,
+            height: isSelected ? 50 : 42,
             decoration: BoxDecoration(
-              color: isSelected
-                  ? brown
-                  : lightBrown,
+              color: isSelected ? brown : lightBrown,
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
-              size: isSelected ? 30 : 25,
-              color: isSelected
-                  ? Colors.white
-                  : brown,
+              size: isSelected ? 27 : 23,
+              color: isSelected ? Colors.white : brown,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             label,
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: isSelected
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              color: isSelected
-                  ? brown
-                  : Colors.grey,
+              fontSize: 12,
+              fontWeight:
+                  isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? brown : Colors.grey,
             ),
           ),
         ],

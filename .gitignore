@@ -46,3 +46,6 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# File yang tidak perlu di-upload ke GitHub
+Coding ListView Beranda_files/

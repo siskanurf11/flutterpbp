@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'model/kue.dart';
 
@@ -22,6 +23,9 @@ class CakeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const brown = Color(0xFF8B5E3C);
+    const darkBrown = Color(0xFF5D321D);
+
     return Container(
       width: 210,
       margin: const EdgeInsets.only(right: 14),
@@ -41,10 +45,7 @@ class CakeCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // =========================
-            // FOTO
-            // =========================
-
+            // FOTO PRODUK
             GestureDetector(
               onTap: onImageTap,
               child: Stack(
@@ -52,24 +53,19 @@ class CakeCard extends StatelessWidget {
                   SizedBox(
                     height: 155,
                     width: double.infinity,
-                    child: Container(
-                      color: Colors.white,
+                    child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: Image.asset(
                         cake.image,
                         fit: BoxFit.contain,
-                        errorBuilder: (
-                          context,
-                          error,
-                          stackTrace,
-                        ) {
+                        errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: const Color(0xFFF0E3D5),
                             child: const Center(
                               child: Icon(
                                 Icons.image_not_supported,
                                 size: 45,
-                                color: Color(0xFF8B5E3C),
+                                color: brown,
                               ),
                             ),
                           );
@@ -78,7 +74,7 @@ class CakeCard extends StatelessWidget {
                     ),
                   ),
 
-                  // FAVORITE
+                  // FAVORIT
                   Positioned(
                     top: 8,
                     right: 8,
@@ -87,12 +83,15 @@ class CakeCard extends StatelessWidget {
                       shape: const CircleBorder(),
                       elevation: 2,
                       child: IconButton(
+                        tooltip: isSaved
+                            ? 'Hapus dari favorit'
+                            : 'Tambah ke favorit',
                         onPressed: onSave,
                         icon: Icon(
                           isSaved
                               ? Icons.favorite
                               : Icons.favorite_border,
-                          color: const Color(0xFF8B5E3C),
+                          color: brown,
                           size: 22,
                         ),
                       ),
@@ -102,17 +101,9 @@ class CakeCard extends StatelessWidget {
               ),
             ),
 
-            // =========================
-            // NAMA
-            // =========================
-
+            // NAMA PRODUK
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                14,
-                8,
-                14,
-                0,
-              ),
+              padding: const EdgeInsets.fromLTRB(14, 8, 14, 0),
               child: Text(
                 cake.name,
                 maxLines: 1,
@@ -120,26 +111,21 @@ class CakeCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF5D321D),
+                  color: darkBrown,
                 ),
               ),
             ),
 
             const SizedBox(height: 5),
 
-            // =========================
             // RATING
-            // =========================
-
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Row(
                 children: [
                   const Icon(
                     Icons.star,
-                    color: Color(0xFF8B5E3C),
+                    color: brown,
                     size: 18,
                   ),
                   const SizedBox(width: 4),
@@ -156,34 +142,24 @@ class CakeCard extends StatelessWidget {
 
             const SizedBox(height: 5),
 
-            // =========================
             // HARGA
-            // =========================
-
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
                 cake.getFormattedPrice(),
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B5E3C),
+                  color: brown,
                 ),
               ),
             ),
 
             const SizedBox(height: 4),
 
-            // =========================
             // STOK
-            // =========================
-
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
               child: Text(
                 cake.getStockInfo(),
                 style: TextStyle(
@@ -195,17 +171,9 @@ class CakeCard extends StatelessWidget {
 
             const Spacer(),
 
-            // =========================
-            // TOMBOL TAMBAH
-            // =========================
-
+            // TOMBOL TAMBAH KE KERANJANG
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                12,
-                8,
-                12,
-                12,
-              ),
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -217,22 +185,14 @@ class CakeCard extends StatelessWidget {
                     size: 17,
                   ),
                   label: Text(
-                    cake.isAvailable()
-                        ? 'Tambah'
-                        : 'Habis',
-                    style: const TextStyle(
-                      fontSize: 13,
-                    ),
+                    cake.isAvailable() ? 'Tambah' : 'Habis',
+                    style: const TextStyle(fontSize: 13),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color(0xFF8B5E3C),
+                    backgroundColor: brown,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor:
-                        Colors.grey.shade300,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 9,
-                    ),
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    padding: const EdgeInsets.symmetric(vertical: 9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
