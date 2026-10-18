@@ -149,116 +149,188 @@ class _HomeContentState extends State<HomeContent> {
 
   // DETAIL PRODUK
   void showCakeDetail(Kue cake) {
-    double currentRating = getRating(cake);
-
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
+      barrierDismissible: true,
+      builder: (dialogContext) {
+        final screenSize = MediaQuery.of(dialogContext).size;
+
+        return Dialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 20,
           ),
-          contentPadding: const EdgeInsets.all(20),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: SizedBox(
-                      height: 200,
-                      width: double.infinity,
-                      child: Image.asset(
-                        cake.image,
-                        fit: BoxFit.contain,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 620,
+              maxHeight: screenSize.height * 0.88,
+            ),
+            child: SizedBox(
+              width: screenSize.width * 0.9,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // FOTO PRODUK
+                          Center(
+                            child: Container(
+                              height: screenSize.width < 500 ? 170 : 210,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF8F1),
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              padding: const EdgeInsets.all(12),
+                              child: Image.asset(
+                                cake.image,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported_outlined,
+                                      size: 48,
+                                      color: Color(0xFF8B5E3C),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+
+                          // NAMA PRODUK
+                          Text(
+                            cake.name,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF5D321D),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // DESKRIPSI
+                          Text(
+                            cake.description,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              height: 1.5,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // HARGA
+                          Text(
+                            cake.getFormattedPrice(),
+                            style: const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF8B5E3C),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          // STOK
+                          Text(
+                            cake.getStockInfo(),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+
+                          // RATING
+                          const Text(
+                            'Rating produk',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF5D321D),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          RatingWidget(
+                            initialRating: getRating(cake),
+                            onRatingChanged: (value) {
+                              setState(() {
+                                ratings[cake] = value;
+                              });
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  cake.name,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF5D321D),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cake.description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  cake.getFormattedPrice(),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B5E3C),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  cake.getStockInfo(),
-                  style: const TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 15),
-                const Text(
-                  'Rating',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF5D321D),
-                  ),
-                ),
-                const SizedBox(height: 5),
-                RatingWidget(
-                  initialRating: currentRating,
-                  onRatingChanged: (value) {
-                    setState(() {
-                      ratings[cake] = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 15),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF8B5E3C),
+
+                  // TOMBOL DETAIL
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () =>
+                                Navigator.pop(dialogContext),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF8B5E3C),
+                              minimumSize: const Size(0, 46),
+                              side: const BorderSide(
+                                color: Color(0xFF8B5E3C),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text('Tutup'),
+                          ),
                         ),
-                        child: const Text('Tutup'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: cake.isAvailable()
-                            ? () {
-                                Navigator.pop(context);
-                                addToCart(cake);
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B5E3C),
-                          foregroundColor: Colors.white,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: cake.isAvailable()
+                                ? () {
+                                    Navigator.pop(dialogContext);
+                                    addToCart(cake);
+                                  }
+                                : null,
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              cake.isAvailable() ? 'Tambah' : 'Habis',
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8B5E3C),
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor:
+                                  Colors.grey.shade300,
+                              disabledForegroundColor: Colors.white,
+                              minimumSize: const Size(0, 46),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
                         ),
-                        child: const Text('Tambah'),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -266,7 +338,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // SECTION KATEGORI
+  // SECTION KATEGORI PRODUK
   Widget buildCategorySection(String title, List<Kue> products) {
     if (products.isEmpty) {
       return const SizedBox();
@@ -321,10 +393,10 @@ class _HomeContentState extends State<HomeContent> {
   // KATEGORI DEKORASI
   Widget buildCategories() {
     final categories = [
-      {'icon': Icons.grid_view_rounded, 'name': 'Semua'},
       {'icon': Icons.cake, 'name': 'Kue Tradisional'},
       {'icon': Icons.celebration, 'name': 'Kue Ulang Tahun'},
       {'icon': Icons.bakery_dining, 'name': 'Pastry'},
+      {'icon': Icons.bakery_dining_outlined, 'name': 'Brownies'},
     ];
 
     return SizedBox(
@@ -634,7 +706,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  // BUILD
+  // HALAMAN BERANDA
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -761,6 +833,10 @@ class _HomeContentState extends State<HomeContent> {
           buildCategorySection(
             'Pastry',
             getProductsByCategory('Pastry'),
+          ),
+          buildCategorySection(
+            'Brownies',
+            getProductsByCategory('Brownies'),
           ),
 
           const SizedBox(height: 30),

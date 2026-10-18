@@ -12,9 +12,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Aplikasi Saya',
+      title: 'Zia Bakery',
       theme: ThemeData(
-        primarySwatch: Colors.orange,
+        primarySwatch: Colors.brown,
+        scaffoldBackgroundColor: const Color(0xFFFFF8F1),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF5D321D),
+          foregroundColor: Colors.white,
+        ),
       ),
       home: const LoginPage(),
     );

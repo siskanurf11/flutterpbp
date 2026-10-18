@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -20,53 +21,51 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  final TextEditingController addressController =
-      TextEditingController();
-
-  String paymentMethod = 'COD';
-  bool isSaving = false;
+  final TextEditingController addressController = TextEditingController();
+  final TextEditingController noteController = TextEditingController();
 
   static const Color darkBrown = Color(0xFF5D321D);
   static const Color brown = Color(0xFF8B5E3C);
   static const Color lightBrown = Color(0xFFE8D5C4);
   static const Color backgroundBrown = Color(0xFFFFF8F1);
 
-  // =========================================================
-  // HITUNG TOTAL
-  // =========================================================
+  String metodePengambilan = 'Ambil di Toko';
+  String paymentMethod = 'Bayar di Toko';
+
+  DateTime? selectedPickupDate;
+  String? selectedPickupTime;
+
+  bool isSaving = false;
+
+  final List<String> pickupTimes = [
+    '09.00 - 10.00',
+    '10.00 - 11.00',
+    '11.00 - 12.00',
+    '12.00 - 13.00',
+    '13.00 - 14.00',
+    '14.00 - 15.00',
+    '15.00 - 16.00',
+    '16.00 - 17.00',
+  ];
+
+  bool get isPickup => metodePengambilan == 'Ambil di Toko';
+
+  @override
+  void dispose() {
+    addressController.dispose();
+    noteController.dispose();
+    super.dispose();
+  }
 
   int getTotal() {
     int total = 0;
 
-    widget.cart.forEach((cake, quantity) {
-      total += cake.price * quantity;
-    });
+    for (final entry in widget.cart.entries) {
+      total += entry.key.price * entry.value;
+    }
 
     return total;
   }
-
-  // =========================================================
-  // FORMAT RUPIAH
-  // =========================================================
-
-  String formatRupiah(int value) {
-    final priceString = value.toString();
-    String result = '';
-
-    for (int i = 0; i < priceString.length; i++) {
-      if (i > 0 && (priceString.length - i) % 3 == 0) {
-        result += '.';
-      }
-
-      result += priceString[i];
-    }
-
-    return 'Rp$result';
-  }
-
-  // =========================================================
-  // JUMLAH PRODUK
-  // =========================================================
 
   int getTotalItems() {
     int total = 0;
@@ -78,24 +77,108 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return total;
   }
 
-  // =========================================================
-  // SIMPAN RIWAYAT PESANAN
-  // =========================================================
+  String formatRupiah(int value) {
+    final String number = value.toString();
+    final StringBuffer result = StringBuffer();
+
+    for (int i = 0; i < number.length; i++) {
+      result.write(number[i]);
+
+      final int remaining = number.length - i - 1;
+
+      if (remaining > 0 && remaining % 3 == 0) {
+        result.write('.');
+      }
+    }
+
+    return 'Rp$result';
+  }
+
+  String formatTanggal(DateTime date) {
+    const List<String> namaBulan = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+
+    return '${date.day} ${namaBulan[date.month - 1]} ${date.year}';
+  }
+
+  void ubahMetodePengambilan(String value) {
+    setState(() {
+      metodePengambilan = value;
+
+      if (value == 'Ambil di Toko') {
+        paymentMethod = 'Bayar di Toko';
+      } else {
+        paymentMethod = 'COD';
+      }
+    });
+  }
+
+  Future<void> pilihTanggalPengambilan() async {
+    final DateTime sekarang = DateTime.now();
+
+    final DateTime hariIni = DateTime(
+      sekarang.year,
+      sekarang.month,
+      sekarang.day,
+    );
+
+    final DateTime? tanggal = await showDatePicker(
+      context: context,
+      initialDate: selectedPickupDate ?? hariIni,
+      firstDate: hariIni,
+      lastDate: DateTime(sekarang.year + 1, 12, 31),
+      helpText: 'Pilih tanggal pengambilan',
+      cancelText: 'Batal',
+      confirmText: 'Pilih',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: brown,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: darkBrown,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (tanggal != null && mounted) {
+      setState(() {
+        selectedPickupDate = tanggal;
+      });
+    }
+  }
 
   Future<void> saveOrderToHistory({
     required String status,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs =
+        await SharedPreferences.getInstance();
 
     final List<String> history =
         prefs.getStringList('riwayat_pesanan') ?? [];
 
     final List<Map<String, dynamic>> items =
         widget.cart.entries.map((entry) {
-      final cake = entry.key;
-      final quantity = entry.value;
+      final Kue cake = entry.key;
+      final int quantity = entry.value;
 
-      return {
+      return <String, dynamic>{
         'nama': cake.name,
         'jumlah': quantity,
         'harga': cake.price,
@@ -104,32 +187,34 @@ class _CheckoutPageState extends State<CheckoutPage> {
       };
     }).toList();
 
-    final order = <String, dynamic>{
+    final Map<String, dynamic> order = {
       'id': DateTime.now().millisecondsSinceEpoch.toString(),
       'tanggal': DateTime.now().toIso8601String(),
-      'alamat': addressController.text.trim(),
+      'metodePengambilan': metodePengambilan,
       'metodePembayaran': paymentMethod,
+      'alamat': isPickup ? '' : addressController.text.trim(),
+      'catatan': noteController.text.trim(),
       'status': status,
       'jumlah': getTotalItems(),
       'total': getTotal(),
       'items': items,
+      'tanggalPengambilan': isPickup
+          ? selectedPickupDate!.toIso8601String()
+          : '',
+      'waktuPengambilan': isPickup ? selectedPickupTime! : '',
     };
 
     history.insert(0, jsonEncode(order));
 
-    final saved = await prefs.setStringList(
+    final bool saved = await prefs.setStringList(
       'riwayat_pesanan',
       history,
     );
 
     if (!saved) {
-      throw Exception('Riwayat pesanan gagal disimpan.');
+      throw Exception('Pesanan gagal disimpan.');
     }
   }
-
-  // =========================================================
-  // CHECKOUT BERHASIL
-  // =========================================================
 
   Future<void> orderNow() async {
     if (isSaving) return;
@@ -137,31 +222,48 @@ class _CheckoutPageState extends State<CheckoutPage> {
     if (widget.cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Keranjang kamu masih kosong.'),
-          backgroundColor: darkBrown,
+          content: Text('Keranjang masih kosong.'),
         ),
       );
       return;
     }
 
-    if (addressController.text.trim().isEmpty) {
+    if (!isPickup && addressController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Silakan masukkan alamat terlebih dahulu.',
-          ),
-          backgroundColor: darkBrown,
+          content: Text('Alamat pengiriman wajib diisi.'),
         ),
       );
       return;
     }
 
-    // QRIS memerlukan konfirmasi pembayaran.
-    // Tombol ini hanya mencatat konfirmasi manual dari pembeli,
-    // bukan verifikasi transaksi otomatis.
-    final String status = paymentMethod == 'COD'
-        ? 'Menunggu pembayaran saat diterima'
-        : 'Menunggu verifikasi pembayaran QRIS';
+    if (isPickup && selectedPickupDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan pilih tanggal pengambilan.'),
+        ),
+      );
+      return;
+    }
+
+    if (isPickup && selectedPickupTime == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan pilih waktu pengambilan.'),
+        ),
+      );
+      return;
+    }
+
+    String status;
+
+    if (paymentMethod == 'COD') {
+      status = 'Menunggu pembayaran saat pesanan diterima';
+    } else if (paymentMethod == 'QRIS') {
+      status = 'Menunggu verifikasi pembayaran QRIS';
+    } else {
+      status = 'Menunggu pembayaran saat diambil di toko';
+    }
 
     setState(() {
       isSaving = true;
@@ -172,110 +274,79 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
       if (!mounted) return;
 
-      showDialog<void>(
+      await showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (dialogContext) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(18),
             ),
             title: const Text(
               'Pesanan Berhasil',
-              textAlign: TextAlign.center,
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 color: darkBrown,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: const BoxDecoration(
-                    color: lightBrown,
-                    shape: BoxShape.circle,
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Pesanan kamu berhasil dibuat.',
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    size: 40,
-                    color: brown,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  paymentMethod == 'COD'
-                      ? 'Pesanan berhasil dibuat. Pembayaran dilakukan saat pesanan diterima.'
-                      : 'Pesanan tersimpan. Pembayaran QRIS perlu dikonfirmasi.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Total: ${formatRupiah(getTotal())}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: brown,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  'Jumlah produk: ${getTotalItems()}',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Metode: $paymentMethod',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: darkBrown,
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Text('Total: ${formatRupiah(getTotal())}'),
+                  Text('Jumlah produk: ${getTotalItems()}'),
+                  Text('Cara menerima: $metodePengambilan'),
+                  Text('Pembayaran: $paymentMethod'),
+                  if (isPickup) ...[
+                    Text(
+                      'Tanggal: ${formatTanggal(selectedPickupDate!)}',
+                    ),
+                    Text('Waktu: $selectedPickupTime'),
+                  ] else ...[
+                    Text(
+                      'Alamat: ${addressController.text.trim()}',
+                    ),
+                  ],
+                  if (noteController.text.trim().isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Catatan: ${noteController.text.trim()}',
+                    ),
+                  ],
+                ],
+              ),
             ),
             actions: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Stok diperbarui setelah pesanan berhasil
-                    widget.onOrderSuccess();
-
-                    Navigator.pop(dialogContext);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: brown,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 13,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Lihat Riwayat Nanti',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: brown,
+                  foregroundColor: Colors.white,
                 ),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+                child: const Text('Selesai'),
               ),
             ],
           );
         },
       );
+
+      if (!mounted) return;
+
+      widget.onOrderSuccess();
+      Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Gagal menyimpan pesanan: $e'),
-          backgroundColor: darkBrown,
         ),
       );
     } finally {
@@ -287,53 +358,52 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
   }
 
-  // =========================================================
-  // WIDGET INFORMASI
-  // =========================================================
-
   Widget buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        color: darkBrown,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: darkBrown,
+        ),
       ),
     );
   }
 
   Widget buildOrderItems() {
     return Container(
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: widget.cart.entries.map((entry) {
-          final cake = entry.key;
-          final quantity = entry.value;
-          final subtotal = cake.price * quantity;
+          final Kue cake = entry.key;
+          final int quantity = entry.value;
 
           return Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.only(bottom: 14),
             child: Row(
               children: [
-                Container(
-                  width: 70,
-                  height: 70,
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: backgroundBrown,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
                   child: Image.asset(
                     cake.image,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) {
-                      return const Icon(
-                        Icons.cake,
-                        size: 35,
-                        color: brown,
+                    width: 65,
+                    height: 65,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 65,
+                        height: 65,
+                        color: lightBrown,
+                        child: const Icon(
+                          Icons.cake,
+                          color: brown,
+                        ),
                       );
                     },
                   ),
@@ -345,31 +415,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     children: [
                       Text(
                         cake.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 15,
                           color: darkBrown,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(height: 4),
                       Text(
                         '${cake.getFormattedPrice()} x $quantity',
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        formatRupiah(cake.price * quantity),
                         style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          color: brown,
                         ),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  formatRupiah(subtotal),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: brown,
                   ),
                 ),
               ],
@@ -380,158 +444,209 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget buildPaymentMethod() {
+  Widget buildMetodePengambilan() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
           RadioListTile<String>(
-            value: 'COD',
-            groupValue: paymentMethod,
+            value: 'Ambil di Toko',
+            groupValue: metodePengambilan,
             activeColor: brown,
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                paymentMethod = value;
-              });
-            },
             title: const Text(
-              'COD',
+              'Ambil di Toko',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: darkBrown,
               ),
             ),
             subtitle: const Text(
-              'Bayar saat pesanan diterima',
+              'Datang langsung untuk mengambil pesanan',
             ),
             secondary: const Icon(
-              Icons.payments_outlined,
+              Icons.storefront,
               color: brown,
             ),
+            onChanged: (value) {
+              if (value != null) {
+                ubahMetodePengambilan(value);
+              }
+            },
           ),
-          const Divider(
-            height: 1,
-            indent: 15,
-            endIndent: 15,
-          ),
+          const Divider(height: 1),
           RadioListTile<String>(
-            value: 'QRIS',
-            groupValue: paymentMethod,
+            value: 'COD',
+            groupValue: metodePengambilan,
             activeColor: brown,
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                paymentMethod = value;
-              });
-            },
             title: const Text(
-              'QRIS',
+              'COD - Diantar ke Alamat',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: darkBrown,
               ),
             ),
             subtitle: const Text(
-              'Bayar menggunakan QRIS',
+              'Pesanan diantar dan dibayar saat diterima',
             ),
             secondary: const Icon(
-              Icons.qr_code_2,
+              Icons.delivery_dining,
               color: brown,
             ),
+            onChanged: (value) {
+              if (value != null) {
+                ubahMetodePengambilan(value);
+              }
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget buildQris() {
-    if (paymentMethod != 'QRIS') {
-      return const SizedBox.shrink();
-    }
-
+  Widget buildInformasiPenerimaan() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (isPickup) ...[
+            const Text(
+              'Tanggal Pengambilan',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: darkBrown,
+              ),
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: pilihTanggalPengambilan,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 15,
+                ),
+                decoration: BoxDecoration(
+                  color: backgroundBrown,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: lightBrown),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_month,
+                      color: brown,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        selectedPickupDate == null
+                            ? 'Pilih tanggal pengambilan'
+                            : formatTanggal(selectedPickupDate!),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: brown,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'Waktu Pengambilan',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: darkBrown,
+              ),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: selectedPickupTime,
+              isExpanded: true,
+              decoration: InputDecoration(
+                hintText: 'Pilih waktu pengambilan',
+                prefixIcon: const Icon(
+                  Icons.access_time,
+                  color: brown,
+                ),
+                filled: true,
+                fillColor: backgroundBrown,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              items: pickupTimes.map((time) {
+                return DropdownMenuItem<String>(
+                  value: time,
+                  child: Text(time),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedPickupTime = value;
+                });
+              },
+            ),
+          ] else ...[
+            const Text(
+              'Alamat Pengiriman',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: darkBrown,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: addressController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: 'Masukkan alamat lengkap',
+                prefixIcon: const Icon(
+                  Icons.location_on_outlined,
+                  color: brown,
+                ),
+                filled: true,
+                fillColor: backgroundBrown,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 18),
           const Text(
-            'Scan QRIS',
+            'Catatan Pesanan (Opsional)',
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
               color: darkBrown,
             ),
           ),
-          const SizedBox(height: 6),
-          const Text(
-            'Scan kode QR untuk melakukan pembayaran.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 15),
-          Container(
-            width: 280,
-            height: 280,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: lightBrown,
-                width: 2,
-              ),
-            ),
-            child: Image.asset(
-              'assets/images/QRIS_ZiaBakery.png',
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) {
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 50,
-                        color: brown,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Gambar QRIS tidak ditemukan.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 15),
-          Text(
-            'Total: ${formatRupiah(getTotal())}',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: brown,
-            ),
-          ),
           const SizedBox(height: 8),
-          const Text(
-            'Pastikan pembayaran telah dilakukan. Status pembayaran belum diverifikasi secara otomatis.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
+          TextField(
+            controller: noteController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText:
+                  'Contoh: tulisan pada kue atau permintaan khusus',
+              alignLabelWithHint: true,
+              filled: true,
+              fillColor: backgroundBrown,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
         ],
@@ -539,67 +654,112 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget buildSummary() {
+  Widget buildMetodePembayaran() {
+    final List<String> paymentOptions = isPickup
+        ? ['Bayar di Toko', 'QRIS']
+        : ['COD', 'QRIS'];
+
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: paymentOptions.map((method) {
+          final bool isQris = method == 'QRIS';
+
+          return RadioListTile<String>(
+            value: method,
+            groupValue: paymentMethod,
+            activeColor: brown,
+            title: Text(
+              method,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: darkBrown,
+              ),
+            ),
+            subtitle: Text(
+              isQris
+                  ? 'Pembayaran melalui QRIS'
+                  : method == 'COD'
+                      ? 'Bayar saat pesanan diterima'
+                      : 'Bayar ketika mengambil pesanan di toko',
+            ),
+            secondary: Icon(
+              isQris
+                  ? Icons.qr_code_2
+                  : method == 'COD'
+                      ? Icons.delivery_dining
+                      : Icons.payments_outlined,
+              color: brown,
+            ),
+            onChanged: (value) {
+              if (value == null) return;
+
+              setState(() {
+                paymentMethod = value;
+              });
+            },
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget buildPaymentSummary() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Jumlah Produk',
-                style: TextStyle(color: Colors.grey),
-              ),
-              Text(
-                '${getTotalItems()} item',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: darkBrown,
-                ),
-              ),
+              const Text('Jumlah produk'),
+              Text('${getTotalItems()} item'),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Metode Pembayaran',
-                style: TextStyle(color: Colors.grey),
-              ),
-              Text(
-                paymentMethod,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: darkBrown,
-                ),
-              ),
-            ],
-          ),
-          const Divider(height: 25),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(
+              const Text('Cara menerima'),
+              Flexible(
                 child: Text(
-                  'Total Pembayaran',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: darkBrown,
-                  ),
+                  isPickup ? 'Ambil di Toko' : 'COD',
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Pembayaran'),
+              Text(paymentMethod),
+            ],
+          ),
+          const Divider(height: 28),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total Pembayaran',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: darkBrown,
                 ),
               ),
               Text(
                 formatRupiah(getTotal()),
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: brown,
                 ),
@@ -611,10 +771,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  // =========================================================
-  // BUILD
-  // =========================================================
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -622,112 +778,75 @@ class _CheckoutPageState extends State<CheckoutPage> {
       appBar: AppBar(
         title: const Text(
           'Checkout',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        centerTitle: true,
-        backgroundColor: brown,
-        foregroundColor: Colors.white,
-        elevation: 0,
+        backgroundColor: darkBrown,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildSectionTitle('Pesanan Kamu'),
-            const SizedBox(height: 12),
-            buildOrderItems(),
-
-            const SizedBox(height: 25),
-
-            buildSectionTitle('Alamat Pengiriman'),
-            const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: TextField(
-                controller: addressController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan alamat lengkap...',
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.only(bottom: 55),
-                    child: Icon(
-                      Icons.location_on_outlined,
-                      color: brown,
+      body: widget.cart.isEmpty
+          ? const Center(
+              child: Text('Keranjang masih kosong.'),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  buildSectionTitle('Pesanan Kamu'),
+                  buildOrderItems(),
+                  const SizedBox(height: 22),
+                  buildSectionTitle('Cara Menerima Pesanan'),
+                  buildMetodePengambilan(),
+                  const SizedBox(height: 22),
+                  buildSectionTitle(
+                    isPickup
+                        ? 'Jadwal Pengambilan'
+                        : 'Informasi Pengiriman',
+                  ),
+                  buildInformasiPenerimaan(),
+                  const SizedBox(height: 22),
+                  buildSectionTitle('Metode Pembayaran'),
+                  buildMetodePembayaran(),
+                  const SizedBox(height: 22),
+                  buildSectionTitle('Ringkasan Pembayaran'),
+                  buildPaymentSummary(),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: isSaving ? null : orderNow,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: brown,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: isSaving
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Buat Pesanan',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
-                ),
+                ],
               ),
             ),
-
-            const SizedBox(height: 25),
-
-            buildSectionTitle('Metode Pembayaran'),
-            const SizedBox(height: 12),
-            buildPaymentMethod(),
-
-            if (paymentMethod == 'QRIS') ...[
-              const SizedBox(height: 18),
-              buildQris(),
-            ],
-
-            const SizedBox(height: 25),
-
-            buildSummary(),
-
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: isSaving ? null : orderNow,
-                icon: isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Icon(
-                        paymentMethod == 'QRIS'
-                            ? Icons.qr_code_2
-                            : Icons.shopping_bag_outlined,
-                      ),
-                label: Text(
-                  isSaving
-                      ? 'Menyimpan Pesanan...'
-                      : 'Pesan Sekarang',
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: brown,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
     );
-  }
-
-  @override
-  void dispose() {
-    addressController.dispose();
-    super.dispose();
   }
 }
